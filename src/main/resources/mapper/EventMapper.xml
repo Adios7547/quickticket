@@ -53,4 +53,10 @@
         delete from events where id = #{id}
     </delete>
 
+    <update id="openReadyEvents">
+        update events
+        set status = 'OPEN', updated_at = now()
+        where status = 'READY' and open_dt &lt;= #{now}
+    </update>
+
 </mapper>

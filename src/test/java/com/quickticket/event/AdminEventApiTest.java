@@ -12,6 +12,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -30,10 +33,13 @@ class AdminEventApiTest {
     @Autowired
     ObjectMapper objectMapper;
 
+    private static final String FUTURE_OPEN_DT = LocalDateTime.now().plusYears(1)
+            .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+
     private static final String CREATE_BODY = """
             {
               "event_nm": "2026 콘서트",
-              "open_dt": "20260701100000",
+              "open_dt": "%s",
               "total_quota": 1000,
               "valid_from": "20260701",
               "valid_to": "20260731",
@@ -44,7 +50,7 @@ class AdminEventApiTest {
                 {"seat_no": "A-2", "grade": "S"}
               ]
             }
-            """;
+            """.formatted(FUTURE_OPEN_DT);
 
     private long createEvent() throws Exception {
         MvcResult result = mockMvc.perform(post("/admin/events")
@@ -73,7 +79,7 @@ class AdminEventApiTest {
     @Test
     @DisplayName("이벤트 생성: open_dt 형식 오류 400 INVALID_PARAM")
     void createEventInvalidOpenDt() throws Exception {
-        String body = CREATE_BODY.replace("20260701100000", "2026-07-01 10:00");
+        String body = CREATE_BODY.replace(FUTURE_OPEN_DT, "2026-07-01 10:00");
         mockMvc.perform(post("/admin/events")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
@@ -81,6 +87,18 @@ class AdminEventApiTest {
                 .andExpect(jsonPath("$.result_code").value("FAIL"))
                 .andExpect(jsonPath("$.error_code").value("INVALID_PARAM"))
                 .andExpect(jsonPath("$.result_msg").value("invalid open_dt format"));
+    }
+
+    @Test
+    @DisplayName("이벤트 생성: open_dt가 과거면 400 INVALID_PARAM")
+    void createEventPastOpenDt() throws Exception {
+        String body = CREATE_BODY.replace(FUTURE_OPEN_DT, "20200101000000");
+        mockMvc.perform(post("/admin/events")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error_code").value("INVALID_PARAM"))
+                .andExpect(jsonPath("$.result_msg").value("open_dt must not be in the past"));
     }
 
     @Test
@@ -135,6 +153,18 @@ class AdminEventApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result_msg").value("updated"))
                 .andExpect(jsonPath("$.data.total_quota").value(1500));
+    }
+
+    @Test
+    @DisplayName("이벤트 수정: open_dt를 과거로 바꾸면 400 INVALID_PARAM")
+    void updateEventPastOpenDt() throws Exception {
+        long eventId = createEvent();
+        mockMvc.perform(put("/admin/events/{eventId}", eventId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"open_dt\": \"20200101000000\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error_code").value("INVALID_PARAM"))
+                .andExpect(jsonPath("$.result_msg").value("open_dt must not be in the past"));
     }
 
     @Test
