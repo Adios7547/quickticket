@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quickticket.event.mapper.SeatMapper">
+
+    <insert id="insertAll">
+        insert into seats (event_id, seat_no, grade, status) values
+        <foreach collection="seats" item="seat" separator=",">
+            (#{seat.eventId}, #{seat.seatNo}, #{seat.grade}, #{seat.status})
+        </foreach>
+    </insert>
+
+    <select id="countByEventId" resultType="long">
+        select count(*) from seats where event_id = #{eventId}
+    </select>
+
+    <delete id="deleteByEventId">
+        delete from seats where event_id = #{eventId}
+    </delete>
+
+</mapper>
