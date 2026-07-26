@@ -1,0 +1,28 @@
+package com.quickticket.event.mapper;
+
+import com.quickticket.event.domain.Event;
+import com.quickticket.event.domain.EventStatus;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+@Mapper
+public interface EventMapper {
+
+    void insert(Event event);
+
+    Event findById(Long id);
+
+    List<Event> findPage(@Param("status") EventStatus status,
+                         @Param("limit") int limit,
+                         @Param("offset") int offset);
+
+    long countByStatus(@Param("status") EventStatus status);
+
+    List<Event> findByStatusOrderByOpenDt(@Param("status") EventStatus status);
+
+    int update(Event event);
+
+    int delete(Long id);
+}
