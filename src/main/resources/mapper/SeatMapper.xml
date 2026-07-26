@@ -4,14 +4,18 @@
 <mapper namespace="com.quickticket.event.mapper.SeatMapper">
 
     <insert id="insertAll">
-        insert into seats (event_id, seat_no, grade, status) values
+        insert into seats (event_id, seat_no, row_no, col_no, grade, status) values
         <foreach collection="seats" item="seat" separator=",">
-            (#{seat.eventId}, #{seat.seatNo}, #{seat.grade}, #{seat.status})
+            (#{seat.eventId}, #{seat.seatNo}, #{seat.rowNo}, #{seat.colNo}, #{seat.grade}, #{seat.status})
         </foreach>
     </insert>
 
     <select id="countByEventId" resultType="long">
         select count(*) from seats where event_id = #{eventId}
+    </select>
+
+    <select id="findByEventId" resultType="Seat">
+        select * from seats where event_id = #{eventId} order by row_no, col_no
     </select>
 
     <delete id="deleteByEventId">
