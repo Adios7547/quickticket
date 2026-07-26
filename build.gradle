@@ -32,6 +32,10 @@ dependencies {
 	// Flyway: DB 스키마 버전 관리 (src/main/resources/db/migration)
 	implementation 'org.springframework.boot:spring-boot-flyway'
 	implementation 'org.flywaydb:flyway-database-postgresql'
+
+	// Swagger UI (API 문서/테스트)
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'

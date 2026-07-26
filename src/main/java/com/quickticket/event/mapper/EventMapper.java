@@ -5,6 +5,7 @@ import com.quickticket.event.domain.EventStatus;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -25,4 +26,7 @@ public interface EventMapper {
     int update(Event event);
 
     int delete(Long id);
+
+    /** open_dt가 지난 READY 이벤트를 OPEN으로 일괄 전환. 반환값은 전환된 건수. */
+    int openReadyEvents(@Param("now") LocalDateTime now);
 }

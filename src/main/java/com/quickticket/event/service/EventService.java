@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,9 +46,12 @@ public class EventService {
         LocalDate validTo = DateTimeUtil.parseDate(request.validTo(), "valid_to");
         validateValidRange(validFrom, validTo);
 
+        LocalDateTime openDt = DateTimeUtil.parseDateTime(request.openDt(), "open_dt");
+        validateOpenDt(openDt);
+
         Event event = Event.builder()
                 .eventNm(request.eventNm())
-                .openDt(DateTimeUtil.parseDateTime(request.openDt(), "open_dt"))
+                .openDt(openDt)
                 .totalQuota(request.totalQuota())
                 .issuedCount(0)
                 .validFrom(validFrom)
@@ -93,9 +97,13 @@ public class EventService {
             throw new BusinessException(ErrorCode.INVALID_PARAM, "total_quota must be positive");
         }
 
-        event.update(request.eventNm(),
-                request.openDt() == null ? null : DateTimeUtil.parseDateTime(request.openDt(), "open_dt"),
-                request.totalQuota(), validFrom, validTo);
+        LocalDateTime openDt = request.openDt() == null ? null
+                : DateTimeUtil.parseDateTime(request.openDt(), "open_dt");
+        if (openDt != null) {
+            validateOpenDt(openDt);
+        }
+
+        event.update(request.eventNm(), openDt, request.totalQuota(), validFrom, validTo);
         eventMapper.update(event);
         return EventResponse.detail(event);
     }
@@ -132,6 +140,12 @@ public class EventService {
             throw new BusinessException(ErrorCode.EVENT_NOT_FOUND);
         }
         return event;
+    }
+
+    private void validateOpenDt(LocalDateTime openDt) {
+        if (openDt.isBefore(LocalDateTime.now())) {
+            throw new BusinessException(ErrorCode.INVALID_PARAM, "open_dt must not be in the past");
+        }
     }
 
     private void validateValidRange(LocalDate validFrom, LocalDate validTo) {
