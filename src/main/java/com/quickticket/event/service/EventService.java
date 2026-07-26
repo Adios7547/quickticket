@@ -179,6 +179,8 @@ public class EventService {
                 seats.add(Seat.builder()
                         .eventId(event.getId())
                         .seatNo(seatNo)
+                        .rowNo(row + 1)
+                        .colNo(col)
                         .grade(grade)
                         .status(SeatStatus.AVAILABLE)
                         .build());
