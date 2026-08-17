@@ -4,6 +4,8 @@ public record QueueRankResponse(
         Long eventId,
         long rank,
         long estimatedWaitSec,
-        long totalWaiting
+        long totalWaiting,
+        boolean captchaRequired,
+        boolean admitted
 ) {
 }
