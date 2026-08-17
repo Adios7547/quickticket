@@ -11,6 +11,7 @@ import java.util.List;
 @Mapper
 public interface EventMapper {
 
+    /** MyBatis insert는 void/int/long/boolean만 리턴 가능 — useGeneratedKeys 설정으로 insert 후 event.id가 채워진다 */
     void insert(Event event);
 
     Event findById(Long id);
